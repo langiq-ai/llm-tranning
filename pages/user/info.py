@@ -1,126 +1,97 @@
-# info.py
 import streamlit as st
 import logging
 import sqlite3
+from contextlib import contextmanager
+import re
+
 # Configure logging
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def create_connection(db_file):
-    """Create a database connection to the SQLite database specified by db_file."""
+
+@contextmanager
+def get_db_connection():
+    """Context manager for database connections"""
+    conn = None
     try:
-        conn = sqlite3.connect(db_file)
-        logging.info(f"Connected to database: {db_file}")
-        return conn
+        conn = sqlite3.connect('user.db')
+        yield conn
     except sqlite3.Error as e:
-        logging.error(f"Error connecting to database: {e}")
-        return None
+        logging.error(f"Database error: {e}")
+        raise
+    finally:
+        if conn:
+            conn.close()
 
-def create_table(conn):
-    """Create the user_info table if it doesn't exist."""
-    try:
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS user_info
-                     (first_name TEXT, last_name TEXT, company_name TEXT, position TEXT, email TEXT, address TEXT, phone TEXT, company_url TEXT)''')
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(pattern, email) is not None
+
+
+def validate_phone(phone):
+    """Validate phone number format"""
+    pattern = r'^\+?1?\d{9,15}$'
+    return re.match(pattern, phone) is not None
+
+
+def validate_url(url):
+    """Validate URL format"""
+    pattern = r'^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$'
+    return re.match(pattern, url) is not None
+
+
+def init_database():
+    """Initialize database and create table"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS user_info
+                         (first_name TEXT, last_name TEXT, company_name TEXT, 
+                          position TEXT, email TEXT, address TEXT, 
+                          phone TEXT, company_url TEXT)''')
         conn.commit()
-        logging.info("Table user_info created or already exists.")
-    except sqlite3.Error as e:
-        logging.error(f"Error creating table: {e}")
 
-def insert_user_info(conn, user_info):
-    """Insert user information into the user_info table."""
-    try:
-        c = conn.cursor()
-        c.execute("INSERT INTO user_info (first_name, last_name, company_name, position, email, address, phone, company_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                  user_info)
+
+def get_user_info():
+    """Get user information from database"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM user_info")
+        return cursor.fetchone()
+
+
+def save_user_info(data, is_update=False):
+    """Save or update user information"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        if is_update:
+            cursor.execute('''UPDATE user_info SET 
+                            first_name=?, last_name=?, company_name=?, 
+                            position=?, email=?, address=?, 
+                            phone=?, company_url=?''', data)
+        else:
+            cursor.execute('''INSERT INTO user_info 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', data)
         conn.commit()
-        logging.info("User information inserted into the database.")
-    except sqlite3.Error as e:
-        logging.error(f"Error inserting user information: {e}")
 
-def update_user_info(conn, user_info):
-    """Update user information in the user_info table."""
-    try:
-        c = conn.cursor()
-        c.execute('''UPDATE user_info SET first_name=?, last_name=?, company_name=?, position=?, email=?, address=?, phone=?, company_url=?''',
-                  user_info)
-        conn.commit()
-        logging.info("User information updated in the database.")
-    except sqlite3.Error as e:
-        logging.error(f"Error updating user information: {e}")
 
-def is_table_empty(conn):
-    """Check if the user_info table is empty."""
-    try:
-        c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM user_info")
-        count = c.fetchone()[0]
-        logging.info(f"Table user_info has {count} records.")
-        return count == 0
-    except sqlite3.Error as e:
-        logging.error(f"Error checking if table is empty: {e}")
-        return True
-
-def get_user_info(conn):
-    """Get user information from the user_info table."""
-    try:
-        c = conn.cursor()
-        c.execute("SELECT * FROM user_info")
-        user_info = c.fetchone()
-        logging.info("User information retrieved from the database.")
-        return user_info
-    except sqlite3.Error as e:
-        logging.error(f"Error retrieving user information: {e}")
-        return None
-# Configure logging
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-# Database file
-DB_FILE = 'user.db'
-
-# Create a database connection
-conn = create_connection(DB_FILE)
-
-# Create the table
-if conn:
-    create_table(conn)
 
 st.header("User Info")
 
-# Check if the table is empty
-if conn and is_table_empty(conn):
-    # Input fields for user information
-    first_name = st.text_input("First Name")
-    last_name = st.text_input("Last Name")
-    company_name = st.text_input("Company Name")
-    position = st.text_input("Position")
-    email = st.text_input("Email")
-    address = st.text_area("Address")
-    phone = st.text_input("Phone")
-    company_url = st.text_input("Company URL")
+# Initialize database
+init_database()
 
-    # Display the entered information and save to database
-    if st.button("Submit"):
-        if not all([first_name, last_name, company_name, position, email, address, phone, company_url]):
-            st.error("All fields must be filled out before submitting.")
-            logging.warning("Submission failed: Not all fields are filled out.")
-        else:
-            st.subheader("Entered Information")
-            st.write(f"**First Name:** {first_name}")
-            st.write(f"**Last Name:** {last_name}")
-            st.write(f"**Company Name:** {company_name}")
-            st.write(f"**Position:** {position}")
-            st.write(f"**Email:** {email}")
-            st.write(f"**Address:** {address}")
-            st.write(f"**Phone:** {phone}")
-            st.write(f"**Company URL:** {company_url}")
+# Get existing user info
+user_info = get_user_info()
 
-            # Save to database
-            insert_user_info(conn, (first_name, last_name, company_name, position, email, address, phone, company_url))
-            st.success("Information saved to database")
-else:
-    # Display user information
-    user_info = get_user_info(conn)
-    if user_info:
+# State management for edit mode
+if 'edit_mode' not in st.session_state:
+    st.session_state.edit_mode = False
+
+# Display/Edit form
+with st.form("user_info_form"):
+    if user_info and not st.session_state.edit_mode:
+        # Display mode
         st.subheader("Stored Information")
         st.write(f"**First Name:** {user_info[0]}")
         st.write(f"**Last Name:** {user_info[1]}")
@@ -131,24 +102,45 @@ else:
         st.write(f"**Phone:** {user_info[6]}")
         st.write(f"**Company URL:** {user_info[7]}")
 
-        if st.button("Edit"):
-            # Pre-fill the form with existing information
-            first_name = st.text_input("First Name", user_info[0])
-            last_name = st.text_input("Last Name", user_info[1])
-            company_name = st.text_input("Company Name", user_info[2])
-            position = st.text_input("Position", user_info[3])
-            email = st.text_input("Email", user_info[4])
-            address = st.text_area("Address", user_info[5])
-            phone = st.text_input("Phone", user_info[6])
-            company_url = st.text_input("Company URL", user_info[7])
-
-            if st.button("Submit Changes"):
-                if not all([first_name, last_name, company_name, position, email, address, phone, company_url]):
-                    st.error("All fields must be filled out before submitting.")
-                    logging.warning("Update failed: Not all fields are filled out.")
-                else:
-                    update_user_info(conn, (first_name, last_name, company_name, position, email, address, phone, company_url))
-                    st.success("Information updated in database")
+        if st.form_submit_button("Edit"):
+            st.session_state.edit_mode = True
+            st.rerun()
     else:
-        st.error("No user information found in the database.")
-        logging.error("No user information found in the database.")
+        # Edit/Create mode
+        first_name = st.text_input("First Name", value=user_info[0] if user_info else "")
+        last_name = st.text_input("Last Name", value=user_info[1] if user_info else "")
+        company_name = st.text_input("Company Name", value=user_info[2] if user_info else "")
+        position = st.text_input("Position", value=user_info[3] if user_info else "")
+        email = st.text_input("Email", value=user_info[4] if user_info else "")
+        address = st.text_area("Address", value=user_info[5] if user_info else "")
+        phone = st.text_input("Phone", value=user_info[6] if user_info else "")
+        company_url = st.text_input("Company URL", value=user_info[7] if user_info else "")
+
+        if st.form_submit_button("Submit"):
+            # Validate inputs
+            validation_errors = []
+            if not validate_email(email):
+                validation_errors.append("Invalid email format")
+            if not validate_phone(phone):
+                validation_errors.append("Invalid phone number format")
+            if not validate_url(company_url):
+                validation_errors.append("Invalid URL format")
+
+            if validation_errors:
+                for error in validation_errors:
+                    st.error(error)
+            elif not all([first_name, last_name, company_name, position, email, address, phone, company_url]):
+                st.error("All fields must be filled out")
+            else:
+                data = (first_name, last_name, company_name, position,
+                        email, address, phone, company_url)
+                try:
+                    save_user_info(data, is_update=bool(user_info))
+                    st.success("Information saved successfully")
+                    st.session_state.edit_mode = False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error saving data: {str(e)}")
+                    logging.error(f"Error saving data: {e}")
+
+
