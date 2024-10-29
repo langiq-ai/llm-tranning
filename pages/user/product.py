@@ -14,19 +14,22 @@ def get_db_connection():
 def init_db():
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("PRAGMA table_info(user_info)")
-        columns = [column[1] for column in cursor.fetchall()]
-        if 'company_description' not in columns:
-            cursor.execute("ALTER TABLE user_info ADD COLUMN company_description TEXT")
-            conn.commit()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL
+            )
+        """)
+        conn.commit()
 
-def update_company_description(product_name, product_description):
+def insert_product(title, description):
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE user_info SET product_description = ? WHERE product_name = ?",
-                (product_description, product_name)
+                "INSERT INTO products (title, description) VALUES (?, ?)",
+                (title, description)
             )
             conn.commit()
         return True
@@ -42,9 +45,15 @@ st.header("Product List")
 if 'products' not in st.session_state:
     st.session_state['products'] = []
 
+# Fetch products from the database
+with get_db_connection() as conn:
+    cursor = conn.cursor()
+    cursor.execute("SELECT title, description FROM products")
+    st.session_state['products'] = cursor.fetchall()
+
 for product in st.session_state['products']:
-    st.subheader(product['title'])
-    st.write(product['description'])
+    st.subheader(product[0])
+    st.write(product[1])
 
 st.header("New Product")
 with st.form(key='product_form'):
@@ -56,9 +65,8 @@ with st.form(key='product_form'):
         if not product_title or not product_description:
             st.error("Both fields are required.")
         else:
-            st.session_state['products'].insert(0, {
-                'title': product_title,
-                'description': product_description
-            })
-            st.success("Product added successfully!")
-            st.rerun()
+            if insert_product(product_title, product_description):
+                st.success("Product added successfully!")
+                st.rerun()
+            else:
+                st.error("Failed to add product.")
