@@ -4,6 +4,11 @@ import logging
 # Add proto folder to path
 sys.path.append("proto")
 
+# Add the directory containing api.py and the proto directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+sys.path.append(os.path.join(current_dir, 'proto'))
+
 import sys
 import logging
 

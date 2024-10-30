@@ -10,8 +10,7 @@ def register_pages():
             st.Page("./pages/user/product.py", title="Product"),
             st.Page("./pages/user/service.py", title="Services"),
             st.Page("pages/user/dashboard.py", title="Dashboard"),
-            st.Page("pages/user/web-search.py", title="Web Search"),
-            st.Page("./pages/user/ai.py", title="AI⭐"),
+            st.Page("./pages/user/ai.py", title="⭐ AI "),
         ],
         "CLIENT": [
             st.Page("pages/client/client.py", title="Client"),
