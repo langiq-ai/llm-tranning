@@ -4,7 +4,7 @@ import streamlit as st
 def register_pages():
     return {
         "-- USER -- ": [
-            st.Page("./pages/user/home.py", title="Home"),
+            st.Page("pages/home.py", title="Home"),
             st.Page("./pages/user/info.py", title="Info"),
             st.Page("./pages/user/company.py", title="Company"),
             st.Page("./pages/user/product.py", title="Product"),
@@ -16,6 +16,7 @@ def register_pages():
         "CLIENT": [
             st.Page("pages/client/client.py", title="Client"),
             st.Page("pages/client/contacts.py", title="Contact"),
+            st.Page("pages/client/add_contacts.py", title="Contact Add "),
         ],
         "VENTURE CAPITAL ": [
             st.Page("./pages/vc/vc.py", title="VC"),

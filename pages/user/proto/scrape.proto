@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package scrape;
+
+service ScrapeService {
+  rpc Scrape (ScrapeRequest) returns (ScrapeResponse);
+  rpc IsScrapingDone (ScrapeStatusRequest) returns (ScrapeStatusResponse);
+  rpc GetScrapingBlob (ScrapeBlobRequest) returns (ScrapeBlobResponse);
+}
+
+message ScrapeRequest {
+  string name = 1;
+  string url = 2;
+}
+
+message ScrapeResponse {
+  string message = 1;
+}
+
+message ScrapeStatusRequest {
+  string name = 1;
+}
+
+message ScrapeStatusResponse {
+  bool is_done = 1;
+}
+
+message ScrapeBlobRequest {
+  string name = 1;
+}
+
+message ScrapeBlobResponse {
+  string json_blob = 1;
+}

@@ -1,2 +1,7 @@
 streamlit~=1.39.0
 pysqlite3
+opencv-python
+pillow
+grpcio
+grpcio-tools
+protobuf

@@ -1,6 +1,55 @@
+import sys
+import os
 import streamlit as st
 import sqlite3
 from contextlib import contextmanager
+# Add the directory containing api.py to the Python path
+
+# Add the directory containing api.py and the proto directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+sys.path.append(os.path.join(current_dir, 'proto'))
+
+import grpc
+from scrape_pb2 import ScrapeRequest, ScrapeBlobRequest, ScrapeStatusRequest
+from scrape_pb2_grpc import ScrapeServiceStub
+
+
+def create_stub():
+    """Create a gRPC stub (client)."""
+    channel = grpc.insecure_channel("localhost:5200")
+    return ScrapeServiceStub(channel)
+
+
+def send_scrape_request(stub, name, url):
+    """Send a scrape request and return the response."""
+    request = ScrapeRequest(name=name, url=url)
+    response = stub.Scrape(request)
+    return response
+
+
+def check_scraping_status(stub, name):
+    """Check if scraping is done and return the status."""
+    status_request = ScrapeStatusRequest(name=name)
+    try:
+        status_response = stub.IsScrapingDone(status_request)
+        logger.info(f"Is scraping done for {name}: {status_response.is_done}")
+        return status_response.is_done
+    except grpc.RpcError as e:
+        logger.error(f"Failed to check scraping status for {name}: {e.details()}")
+        return None
+
+
+def get_scraping_blob(stub, name):
+    """Get the scraping blob as JSON and return it."""
+    blob_request = ScrapeBlobRequest(name=name)
+    try:
+        blob_response = stub.GetScrapingBlob(blob_request)
+        #logger.info(f"Scraping blob for {name}: {blob_response.json_blob}")
+        return blob_response.json_blob
+    except grpc.RpcError as e:
+        #logger.error(f"Failed to get scraping blob for {name}: {e.details()}")
+        return None
 
 
 @contextmanager
@@ -36,6 +85,10 @@ def update_company_description(company_name, new_description):
         st.error(f"Database error: {e}")
         return False
 
+def search_company(company_name):
+    # Implement the search logic here
+    stub = create_stub()
+    send_scrape_request(stub, "EmbeddedOne", "http://embeddedone.com")
 
 # Initialize database
 init_db()
@@ -60,7 +113,8 @@ for company_name, company_url, company_description in data:
     with col2:
         st.write(f"**URL:** {company_url}")
     with col3:
-        st.button("Search ")
+        if st.button("Search", key=f"search_btn_{company_name}"):
+            search_company(company_name)
 
 form_key = f"form_{company_name}"
 
@@ -93,3 +147,9 @@ if not company_description or st.session_state.get(f"edit_{company_name}", False
 
 # Display the information using Streamlit
 st.markdown("### Company web curl info ")
+stub = create_stub()
+data = get_scraping_blob(stub, "soccentric.com")
+with st.expander("Scraping Data"):
+    st.write(data)
+
+# save the data to web_curl in the user.db databse
