@@ -7,6 +7,8 @@ def register_pages():
             st.Page("./pages/user/company.py", title="Company"),
             st.Page("./pages/user/product.py", title="Product"),
             st.Page("./pages/user/service.py", title="Services"),
+            st.Page("pages/user/dashboard.py", title="Dashboard"),
+            st.Page("pages/user/web-search.py", title="Web Search"),
             st.Page("./pages/user/ai.py", title="AI⭐"),
         ],
         "CLIENT": [
@@ -17,13 +19,24 @@ def register_pages():
         ],
         "-- RETRIEVAL-AUGMENTED GENERATION -- ": [
             st.Page("./pages/rag/rag.py", title="RAG"),
+            st.Page("./pages/rag/embeddings.py", title="Embeddings"),
         ],
         "-- TRAINING --": [
-            st.Page("./pages/training/oolma.py", title="OOLama"),
+            st.Page("./pages/training/anthropic.py", title="AnthropicLLM"),
+            st.Page("./pages/training/aws.py", title="AzureOpenAI"),
+            st.Page("./pages/training/BedrockLLM.py", title="BedrockLLM"),
+            st.Page("./pages/training/cohere.py", title="CohereLLM"),
+            st.Page("./pages/training/fireworks.py", title="FireworksLLM"),
+            st.Page("./pages/training/ollama.py", title="OllamaLLM"),
+            st.Page("./pages/training/openai.py", title="OpenAILLM"),
+            st.Page("./pages/training/together.py", title="TogetherLLM"),
+            st.Page("./pages/training/google_vertexai.py", title="VertexAILLM"),
         ],
     }
 pages = register_pages()
 pg = st.navigation(pages)
 pg.run()
+
+
 
 
