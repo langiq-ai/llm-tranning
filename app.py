@@ -1,8 +1,10 @@
 import streamlit as st
 
+
 def register_pages():
     return {
         "-- USER -- ": [
+            st.Page("./pages/user/home.py", title="Home"),
             st.Page("./pages/user/info.py", title="Info"),
             st.Page("./pages/user/company.py", title="Company"),
             st.Page("./pages/user/product.py", title="Product"),
@@ -13,6 +15,7 @@ def register_pages():
         ],
         "CLIENT": [
             st.Page("pages/client/client.py", title="Client"),
+            st.Page("pages/client/contacts.py", title="Contact"),
         ],
         "VENTURE CAPITAL ": [
             st.Page("./pages/vc/vc.py", title="VC"),
@@ -33,10 +36,8 @@ def register_pages():
             st.Page("./pages/training/google_vertexai.py", title="VertexAILLM"),
         ],
     }
+
+
 pages = register_pages()
 pg = st.navigation(pages)
 pg.run()
-
-
-
-
