@@ -1,6 +1,13 @@
 import sqlite3
 import streamlit as st
 import grpc
+import os
+import sys
+# Add the directory containing api.py and the proto directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+sys.path.append(os.path.join(current_dir, 'proto'))
+
 from scrape_pb2 import ScrapeRequest, ScrapeBlobRequest, ScrapeStatusRequest
 from scrape_pb2_grpc import ScrapeServiceStub
 from contextlib import contextmanager

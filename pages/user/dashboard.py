@@ -147,13 +147,17 @@ def display_items(items: List[Tuple], title: str):
 def create_rag_data():
     st.write("RAG data creation process started...")
 
-    # Create a folder data/RAG/company_name
-    company_name = "example_company"  # Replace with actual company name
-    folder_path = os.path.join("data", "RAG", company_name)
-    os.makedirs(folder_path, exist_ok=True)
-
     # Fetch user info
     user_info = get_user_info()
+
+    if not user_info:
+        st.error("No user information found.")
+        return
+
+    # Use the first user's company name as an example
+    company_name = user_info[0][2]  # Assuming the company name is the third element in the tuple
+    folder_path = os.path.join("data", "RAG", company_name)
+    os.makedirs(folder_path, exist_ok=True)
 
     # Save company info to company_name.yaml in YAML format
     company_info = {
