@@ -26,7 +26,7 @@ def register_pages():
         ],
         "-- RETRIEVAL-AUGMENTED GENERATION -- ": [
             st.Page("./pages/rag/rag.py", title="RAG"),
-            st.Page("./pages/rag/embeddings.py", title="Embeddings"),
+            st.Page("pages/rag/retrieval.py", title="Retrival"),
         ],
         "-- TRAINING --": [
             st.Page("./pages/training/anthropic.py", title="AnthropicLLM"),
