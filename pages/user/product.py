@@ -27,10 +27,23 @@ def insert_product(title, description):
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM products WHERE title = ?", (title,))
+            if cursor.fetchone()[0] > 0:
+                return "Product with this title already exists."
             cursor.execute(
                 "INSERT INTO products (title, description) VALUES (?, ?)",
                 (title, description)
             )
+            conn.commit()
+        return True
+    except sqlite3.Error as e:
+        return str(e)
+
+def delete_product(title):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM products WHERE title = ?", (title,))
             conn.commit()
         return True
     except sqlite3.Error as e:
@@ -51,9 +64,23 @@ with get_db_connection() as conn:
     cursor.execute("SELECT title, description FROM products")
     st.session_state['products'] = cursor.fetchall()
 
+import streamlit as st
+
 for product in st.session_state['products']:
-    st.subheader(product[0])
-    st.write(product[1])
+    col1, col2, col3 = st.columns([1, 10, 2])
+
+    with col1:
+        st.subheader(product[0])
+    with col2:
+        st.write(product[1])
+    with col3:
+        if st.button(f"Delete {product[0]}", key=f"delete_{product[0]}"):
+            if delete_product(product[0]):
+                st.success(f"Product '{product[0]}' deleted successfully!")
+                st.session_state['products'] = [p for p in st.session_state['products'] if p[0] != product[0]]
+                st.rerun()
+            else:
+                st.error(f"Failed to delete product '{product[0]}'.")
 
 st.header("New Product")
 with st.form(key='product_form'):
@@ -65,8 +92,9 @@ with st.form(key='product_form'):
         if not product_title or not product_description:
             st.error("Both fields are required.")
         else:
-            if insert_product(product_title, product_description):
+            result = insert_product(product_title, product_description)
+            if result is True:
                 st.success("Product added successfully!")
                 st.rerun()
             else:
-                st.error("Failed to add product.")
+                st.error(result)
