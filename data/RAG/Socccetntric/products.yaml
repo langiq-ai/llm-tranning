@@ -1,27 +1,14 @@
 - !!python/tuple
-  - 'Acadia '
-  - Zion is Soccentric's advanced embedded platform built on the AMD Xilinx Zynq UltraScale+
-    MPSoC. It features multicore ARM processors, extensive FPGA logic, AI/ML capabilities,
-    and robust connectivity options. Ideal for medical, renewable energy, and sensor
-    fusion applications, it includes value-added features like OTA updates and remote
-    device management.
+  - 'Arches '
+  - 'Acadia is embedded platform available in two versions: Acadia and Acadia Mini.
+    Acadia, based on Raspberry Pi Compute Module 4/5, offers robust computing. Acadia
+    Mini, using Raspberry Pi Pico, provides low-power real-time solutions. Both feature
+    custom OS, OTA updates, and telemetry, serving industries from robotics to environmental
+    monitoring.'
 - !!python/tuple
-  - 'Acadia '
-  - Zion is Soccentric's advanced embedded platform built on the AMD Xilinx Zynq UltraScale+
-    MPSoC. It features multicore ARM processors, extensive FPGA logic, AI/ML capabilities,
-    and robust connectivity options. Ideal for medical, renewable energy, and sensor
-    fusion applications, it includes value-added features like OTA updates and remote
-    device management.
-- !!python/tuple
-  - 'Kauai '
-  - Kauai is a flexible, container-based cloud platform supporting IoT device management,
-    real-time data streaming, AI/ML integration, and multi-cloud deployment. It offers
-    secure data warehousing, advanced event automation, and scalable resource management
-    across web, mobile, and desktop interfaces, with extensive database and protocol
-    support for seamless system integration.
-- !!python/tuple
-  - Arches
-  - The Arches platform is built on Nvidia Jetson NX, offering advanced AI performance
-    with 8-core ARM Cortex-A78AE CPU, 1024 CUDA cores, and 70 TOPS. It supports edge
-    AI, robotics, multimedia processing, and IoT tasks, with secure boot, OTA updates,
-    telemetry, and sensor fusion on a Yocto-based Linux system.
+  - 'Arches Max '
+  - 'Acadia is embedded platform available in two versions: Acadia and Acadia Mini.
+    Acadia, based on Raspberry Pi Compute Module 4/5, offers robust computing. Acadia
+    Mini, using Raspberry Pi Pico, provides low-power real-time solutions. Both feature
+    custom OS, OTA updates, and telemetry, serving industries from robotics to environmental
+    monitoring.'

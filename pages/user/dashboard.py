@@ -5,6 +5,7 @@ import streamlit as st
 from contextlib import contextmanager
 from typing import List, Tuple, Optional
 
+
 # Database Connection
 @contextmanager
 def get_db_connection():
@@ -19,6 +20,7 @@ def get_db_connection():
     finally:
         if conn:
             conn.close()
+
 
 # Database Initialization
 def init_db():
@@ -66,6 +68,7 @@ def init_db():
 
         conn.commit()
 
+
 def get_scraping_data():
     try:
         with sqlite3.connect("user.db") as conn:
@@ -75,6 +78,7 @@ def get_scraping_data():
     except sqlite3.Error as e:
         st.error(f"Database error: {e}")
         return []
+
 
 # Data Fetching
 def fetch_data(table: str, columns: List[str]) -> List[Tuple]:
@@ -88,6 +92,7 @@ def fetch_data(table: str, columns: List[str]) -> List[Tuple]:
     except sqlite3.Error as e:
         st.error(f"Error fetching data from {table}: {e}")
         return []
+
 
 # User Information
 def get_user_info() -> List[Tuple]:
@@ -105,6 +110,7 @@ def get_user_info() -> List[Tuple]:
             "company_url",
         ],
     )
+
 
 def display_user_info(user_data: List[Tuple]):
     """Display user information in a structured format."""
@@ -131,6 +137,7 @@ def display_user_info(user_data: List[Tuple]):
             if user[7]:  # Company URL
                 st.write(f"**Website:** [{user[7]}]({user[7]})")
 
+
 # Products and Services
 def display_items(items: List[Tuple], title: str):
     """Display products or services in a structured format."""
@@ -141,8 +148,9 @@ def display_items(items: List[Tuple], title: str):
     st.header(title)
 
     for item in items:
-        st.write(f"**{item[0]}**")
+        st.subheader(f"{item[0]}")
         st.write(item[1])
+
 
 def create_rag_data():
     st.write("RAG data creation process started...")
@@ -155,14 +163,16 @@ def create_rag_data():
         return
 
     # Use the first user's company name as an example
-    company_name = user_info[0][2]  # Assuming the company name is the third element in the tuple
+    company_name = user_info[0][
+        2
+    ]  # Assuming the company name is the third element in the tuple
     folder_path = os.path.join("data", "RAG", company_name)
     os.makedirs(folder_path, exist_ok=True)
 
     # Save company info to company_name.yaml in YAML format
     company_info = {
         "name": company_name,
-        "info": user_info  # Replace with actual company info
+        "info": user_info,  # Replace with actual company info
     }
     with open(os.path.join(folder_path, f"{company_name}.yaml"), "w") as file:
         yaml.dump(company_info, file)
@@ -184,6 +194,7 @@ def create_rag_data():
 
     st.success("RAG data created successfully!")
 
+
 # Main App
 st.header("Company Dashboard")
 
@@ -202,7 +213,7 @@ try:
     st.session_state["products"] = fetch_data("products", ["title", "description"])
 
     # Fetch services
-    st.session_state["services"] = fetch_data("service", ["title", "description"])
+    st.session_state["services"] = fetch_data("services", ["title", "description"])
 
     # Fetch user info
     user_info = get_user_info()

@@ -8,6 +8,8 @@ from langchain_nomic.embeddings import NomicEmbeddings
 import logging
 import shutil
 
+from tornado.gen import sleep
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -52,6 +54,7 @@ def remove_rag_db():
         logging.info(f"Removed directory: {persistent_directory}")
     else:
         logging.info(f"Directory does not exist: {persistent_directory}")
+
 
 
 # Function to generate the RAG vector store
@@ -125,5 +128,8 @@ def generate_rag():
 
 
 # Add buttons with callbacks
-st.button("Remove Rag DB", on_click=remove_rag_db)
-st.button("Generate Rag", on_click=generate_rag)
+if st.button("Remove Rag DB", on_click=remove_rag_db) :
+    st.rerun()
+if st.button("Generate Rag", on_click=generate_rag) :
+    st.rerun()
+

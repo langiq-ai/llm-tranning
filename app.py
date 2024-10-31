@@ -1,6 +1,8 @@
 import streamlit as st
 
 st.set_page_config(layout="wide")
+
+
 def register_pages():
     return {
         "-- USER -- ": [
@@ -15,10 +17,12 @@ def register_pages():
         "CLIENT": [
             st.Page("pages/client/client.py", title="Client"),
             st.Page("pages/client/contacts.py", title="Contact"),
-            st.Page("pages/client/add_contacts.py", title="Contact Add "),
         ],
         "VENTURE CAPITAL ": [
             st.Page("./pages/vc/vc.py", title="VC"),
+        ],
+        "CARD APP ": [
+            st.Page("./pages/card/card.py", title="Card App"),
         ],
         "-- RETRIEVAL-AUGMENTED GENERATION -- ": [
             st.Page("./pages/rag/rag.py", title="RAG"),
