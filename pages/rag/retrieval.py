@@ -45,9 +45,10 @@ if 'search_complete' not in st.session_state:
     st.session_state.search_complete = False
 if 'results' not in st.session_state:
     st.session_state.results = None
+if 'current_chunk' not in st.session_state:
+    st.session_state.current_chunk = 0
 
 
-@st.cache_resource(ttl=3600)  # Cache for 1 hour
 def get_embeddings():
     """Initialize and cache embeddings with timeout"""
     try:
@@ -60,7 +61,7 @@ def get_embeddings():
         return None
 
 
-@st.cache_resource(ttl=3600)  # Cache for 1 hour
+
 def get_retriever():
     """Initialize and cache the vector store and retriever with timeout"""
     try:
@@ -89,8 +90,8 @@ def get_retriever():
         return db.as_retriever(
             search_type="similarity_score_threshold",
             search_kwargs={
-                "k": 3,
-                "score_threshold": 0.1
+                "k": 10,
+                "score_threshold": 0.2
             }
         )
 
@@ -109,7 +110,6 @@ def search_with_timeout(retriever, query):
             raise TimeoutError("Search operation timed out")
 
 
-
 def display_results(documents, query):
     """Display search results in a chunked format"""
     if not documents:
@@ -118,29 +118,33 @@ def display_results(documents, query):
 
     st.subheader(f"Results for: '{query}'")
 
-    # Create a container for all results
-    with st.container():
-        # Process results in chunks
-        for i, doc in enumerate(documents, 1):
-            st.markdown(f"### Document {i} - Source: {doc.metadata.get('source', 'Unknown')}")
-            col1, col2 = st.columns([3, 1])
+    # Calculate the range of documents to display
+    start_idx = st.session_state.current_chunk * config.chunk_size
+    end_idx = start_idx + config.chunk_size
+    chunk = documents[start_idx:end_idx]
 
-            with col1:
-                st.markdown(doc.page_content)
+    # Display the current chunk of documents
+    for i, doc in enumerate(chunk, start=start_idx + 1):
+        st.markdown(f"### Document {i} - Source: {doc.metadata.get('source', 'Unknown')}")
+        col1, col2 = st.columns([3, 1])
 
-            with col2:
-                st.markdown("**Metadata:**")
-                # Display metadata in a more compact format
-                metadata_html = "<br>".join([
-                    f"<b>{key}:</b> {value}"
-                    for key, value in doc.metadata.items()
-                    if key != 'source'
-                ])
-                st.markdown(metadata_html, unsafe_allow_html=True)
+        with col1:
+            st.markdown(doc.page_content)
 
-            # Add a small delay between chunks to prevent UI freezing
-            time.sleep(0.05)
+        with col2:
+            st.markdown("**Metadata:**")
+            metadata_html = "<br>".join([
+                f"<b>{key}:</b> {value}"
+                for key, value in doc.metadata.items()
+                if key != 'source'
+            ])
+            st.markdown(metadata_html, unsafe_allow_html=True)
 
+    # Button to load more documents
+    if end_idx < len(documents):
+        if st.button("Load more", key="load_more_btn"):
+            st.session_state.current_chunk += 1
+            st.rerun()
 
 
 st.title("Document Retrieval System")
@@ -203,10 +207,11 @@ if submit_button:
             # Store results in session state
             st.session_state.results = relevant_docs
             st.session_state.search_complete = True
+            st.session_state.current_chunk = 0
 
             st.success("Processing results...3")
         except TimeoutError:
-            sst.error("Search operation timed out. Please try a more specific query.")
+            st.error("Search operation timed out. Please try a more specific query.")
         except Exception as e:
             logger.error(f"Error during search: {e}")
             st.error(f"An error occurred during the search: {str(e)}")
@@ -214,5 +219,3 @@ if submit_button:
 # Display results if search is complete
 if st.session_state.search_complete and st.session_state.results is not None:
     display_results(st.session_state.results, query)
-
-

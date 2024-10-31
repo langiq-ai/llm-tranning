@@ -1,4 +1,3 @@
-- !!python/tuple
   - soccentric.com
   - "{\n    \"Name\": \"Soccentric\",\n    \"url\": \"http://soccentric.com\",\n \
     \   \"data\": \"Soc-centric - Platform as a ServiceHomeTurn-KeyAIAcadiaArchesZionPinnacleMauiKauaiLehuaOkalaContact+\
@@ -1277,7 +1276,7 @@
     \ Homes & Buildings: Enables automation, monitoring, and real-time control of\
     \ smart devices for security, lighting, HVAC, and energy management in homes and\
     \ commercial buildings.\",\n    \"time\": \"2024-10-29T20:51:00.631103\"\n}"
-- !!python/tuple
+
   - soccentric.com
   - "{\n    \"Name\": \"Soccentric\",\n    \"url\": \"http://soccentric.com\",\n \
     \   \"data\": \"Soc-centric - Platform as a ServiceHomeTurn-KeyAIAcadiaArchesZionPinnacleMauiKauaiLehuaOkalaContact+\

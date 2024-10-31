@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional, List
 from contextlib import contextmanager
 from chromadb.config import Settings
+from langchain_text_splitters import SentenceTransformersTokenTextSplitter
 
 # Configure logging with more detailed format
 logging.basicConfig(
@@ -125,7 +126,6 @@ def load_documents(company: str) -> List:
             logger.error(f"Error loading {file_path.name}: {e}")
             st.warning(f"Skipped {file_path.name} due to error")
             continue
-
     return documents
 
 
@@ -145,7 +145,9 @@ def generate_rag():
             documents = load_documents(company)
 
         with st.spinner("Processing documents..."):
-            text_splitter = CharacterTextSplitter(chunk_size=10, chunk_overlap=10)
+            # text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=50)
+            #text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=50)
+            text_splitter = SentenceTransformersTokenTextSplitter(chunk_size=1000, chunk_overlap=100)
             docs = text_splitter.split_documents(documents)
             st.info(f"Created {len(docs)} document chunks")
 
