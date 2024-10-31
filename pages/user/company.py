@@ -3,6 +3,7 @@ import streamlit as st
 import grpc
 import os
 import sys
+
 # Add the directory containing api.py and the proto directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -12,6 +13,8 @@ from scrape_pb2 import ScrapeRequest, ScrapeBlobRequest, ScrapeStatusRequest
 from scrape_pb2_grpc import ScrapeServiceStub
 from contextlib import contextmanager
 import re
+
+
 # Database Functions
 @contextmanager
 def get_db_connection():
@@ -20,6 +23,7 @@ def get_db_connection():
         yield conn
     finally:
         conn.close()
+
 
 def init_db():
     with get_db_connection() as conn:
@@ -41,6 +45,7 @@ def init_db():
         """)
         conn.commit()
 
+
 def update_company_description(company_name, new_description):
     try:
         with get_db_connection() as conn:
@@ -55,15 +60,18 @@ def update_company_description(company_name, new_description):
         st.error(f"Database error: {e}")
         return False
 
+
 # gRPC Functions
 def create_stub():
     channel = grpc.insecure_channel("localhost:5200")
     return ScrapeServiceStub(channel)
 
+
 def send_scrape_request(stub, name, url):
     request = ScrapeRequest(name=name, url=url)
     response = stub.Scrape(request)
     return response
+
 
 def check_scraping_status(stub, name):
     status_request = ScrapeStatusRequest(name=name)
@@ -73,6 +81,7 @@ def check_scraping_status(stub, name):
     except grpc.RpcError as e:
         st.error(f"Failed to check scraping status: {e.details()}")
         return None
+
 
 def get_scraping_data():
     try:
@@ -84,6 +93,7 @@ def get_scraping_data():
         st.error(f"Database error: {e}")
         return []
 
+
 def get_scraping_blob(stub, name):
     blob_request = ScrapeBlobRequest(name=name)
     try:
@@ -93,8 +103,10 @@ def get_scraping_blob(stub, name):
         st.error(f"Failed to get scraping blob: {e.details()}")
         return None
 
+
 # Streamlit App
 init_db()
+
 
 def strip_url(url):
     # Remove 'https://' or 'http://'
@@ -131,6 +143,7 @@ def save_scraping_data_to_db(company_name, data):
         st.error(f"Database error: {e}")
         return False
 
+
 with get_db_connection() as conn:
     cursor = conn.cursor()
     cursor.execute("SELECT company_name, company_url, company_description FROM user_info")
@@ -147,7 +160,10 @@ for company_name, company_url, company_description in data:
     with col3:
         if st.button("Search", key=f"search_btn_{company_name}"):
             stub = create_stub()
-            send_scrape_request(stub, company_name, company_url)
+            try:
+                send_scrape_request(stub, company_name, company_url)
+            except Exception as e:
+                st.warning(f"Failed to send scrape request: {e}")
 
     form_key = f"form_{company_name}"
 
@@ -189,4 +205,3 @@ if data:
 
 with st.expander("Scraping Data"):
     st.write(data)
-
