@@ -24,3 +24,7 @@ pydantic
 nomic
 pathlib
 langchain-ollama
+psutil
+pynvml
+matplotlib
+plotly
